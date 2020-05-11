@@ -12,9 +12,5 @@ import org.springframework.boot.runApplication
 class SpringGraphqlApplication
 
 fun main(args: Array<String>) {
-//    val config = SchemaGeneratorConfig(listOf("com.gt.spring_graphql"))
-//    val queries = listOf(TopLevelObject(BookQuery()))
-//    val schema: GraphQLSchema = toSchema(config, queries)
-
     runApplication<SpringGraphqlApplication>(*args)
 }

@@ -18,11 +18,10 @@ data class BookListPayload(
         var filterBookName: String?,
         var filterAuthorName: String?,
         var filterKeyword: String?,
-        var sortBy: SortBy? ,
+        var sortBy: SortBy?,
         var sortOrder: Sort.Direction?,
-        @GraphQLDescription("Page must be greater than 1")
-        var page: Int? ,
-        @GraphQLDescription("Page sizw must be greater than 1")
+        var page: Int?,
+        @GraphQLDescription("Page size must be greater than 1")
         var pageSize: Int?
 ) {
     fun toSpec(): Specification<BookEntity> = Specification { root, _, cb ->
@@ -31,16 +30,16 @@ data class BookListPayload(
             predicates.add(cb.equal(root.get<String>("name"), this))
         }
         filterAuthorName?.takeIf { it.isNotBlank() }?.apply {
-            predicates.add(cb.equal(root.get<String>("author"), this))
+            predicates.add(cb.equal(root.get<UserEntity>("user").get<String>("name"), this))
         }
         filterKeyword?.takeIf { it.isNotBlank() }?.apply {
             predicates.add(cb.or(cb.like(root.get("name"), "%${this}%"),
-                    cb.like(root.get<String>("author"), "%${this}%")))
+                    cb.like(root.get<UserEntity>("user").get<String>("name"), "%${this}%")))
         }
         cb.and(*predicates.toTypedArray())
     }
 
-    fun toPage(): Pageable = PageRequest.of(page?: 0, pageSize ?: 1, Sort.by(
+    fun toPage(): Pageable = PageRequest.of(page ?: 0, pageSize ?: 1, Sort.by(
             sortOrder ?: Sort.Direction.DESC, sortBy?.field ?: SortBy.BOOK_PUBLISH_DATE.field
     ))
 }
@@ -95,6 +94,7 @@ data class CommentModel(
 }
 
 data class UserModel(
+        @GraphQLID
         var id: String,
         var name: String?,
         var avatar: String?
