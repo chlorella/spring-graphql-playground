@@ -3,9 +3,8 @@ graphql:
     - com.gt.spring_graphql.graphql
 
 #Database Configuration
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: 123456
+datasource:
+  url: jdbc:postgresql://localhost:5432/postgres
+  username: postgres
+  password: 123456
 

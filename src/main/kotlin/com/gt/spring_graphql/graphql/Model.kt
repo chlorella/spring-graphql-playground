@@ -6,6 +6,9 @@ import com.gt.spring_graphql.BookEntity
 import com.gt.spring_graphql.CommentEntity
 import com.gt.spring_graphql.UserEntity
 import org.joda.time.DateTime
+import org.jooq.generated.tables.records.AuthorRecord
+import org.jooq.generated.tables.records.BookRecord
+import org.jooq.generated.tables.records.CommentRecord
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -24,59 +27,61 @@ data class BookListPayload(
         @GraphQLDescription("Page size must be greater than 1")
         var pageSize: Int?
 ) {
-    fun toSpec(): Specification<BookEntity> = Specification { root, _, cb ->
-        val predicates = mutableListOf<Predicate>()
-        filterBookName?.takeIf { it.isNotBlank() }?.apply {
-            predicates.add(cb.equal(root.get<String>("name"), this))
-        }
-        filterAuthorName?.takeIf { it.isNotBlank() }?.apply {
-            predicates.add(cb.equal(root.get<UserEntity>("user").get<String>("name"), this))
-        }
-        filterKeyword?.takeIf { it.isNotBlank() }?.apply {
-            predicates.add(cb.or(cb.like(root.get("name"), "%${this}%"),
-                    cb.like(root.get<UserEntity>("user").get<String>("name"), "%${this}%")))
-        }
-        cb.and(*predicates.toTypedArray())
-    }
-
-    fun toPage(): Pageable = PageRequest.of(page ?: 0, pageSize ?: 1, Sort.by(
-            sortOrder ?: Sort.Direction.DESC, sortBy?.field ?: SortBy.BOOK_PUBLISH_DATE.field
-    ))
+//    fun toSpec(): Specification<BookEntity> = Specification { root, _, cb ->
+//        val predicates = mutableListOf<Predicate>()
+//        filterBookName?.takeIf { it.isNotBlank() }?.apply {
+//            predicates.add(cb.equal(root.get<String>("name"), this))
+//        }
+//        filterAuthorName?.takeIf { it.isNotBlank() }?.apply {
+//            predicates.add(cb.equal(root.get<UserEntity>("user").get<String>("name"), this))
+//        }
+//        filterKeyword?.takeIf { it.isNotBlank() }?.apply {
+//            predicates.add(cb.or(cb.like(root.get("name"), "%${this}%"),
+//                    cb.like(root.get<UserEntity>("user").get<String>("name"), "%${this}%")))
+//        }
+//        cb.and(*predicates.toTypedArray())
+//    }
+//
+//    fun toPage(): Pageable = PageRequest.of(page ?: 0, pageSize ?: 1, Sort.by(
+//            sortOrder ?: Sort.Direction.DESC, sortBy?.field ?: SortBy.BOOK_PUBLISH_DATE.field
+//    ))
 }
 
 enum class SortBy(val field: String) {
     BOOK_NAME("name"), BOOK_PUBLISH_DATE("publishDate")
 }
 
-data class BookListModel(
-        var totalCount: Long = 0,
-        var totalPage: Int = 0,
-        var books: List<BookModel> = emptyList()
-) {
-    constructor(page: Page<BookEntity>) : this(
-            totalCount = page.totalElements,
-            totalPage = page.number + 1,
-            books = page.content.map {
-                println("$it")
-                BookModel(it)
-            })
-}
+//data class BookListModel(
+//        var totalCount: Long = 0,
+//        var totalPage: Int = 0,
+//        var books: List<BookModel> = emptyList()
+//) {
+//    constructor(page: Page<BookEntity>) : this(
+//            totalCount = page.totalElements,
+//            totalPage = page.number + 1,
+//            books = page.content.map {
+//                println("$it")
+//                BookModel(it)
+//            })
+//}
 
 data class BookModel(
         @GraphQLID
         var id: String,
         var name: String?,
-        var publishDate: String,
-        var comments: List<CommentModel> = emptyList(),
-        var author: UserModel?
+        var publishDate: String
+//        ,
+//        var comments: List<CommentModel> = emptyList(),
+//        var author: UserModel?
 ) {
-    constructor(entity: BookEntity) :
+    constructor(entity: BookRecord, comments: List<CommentRecord>, user: AuthorRecord) :
             this(
                     id = entity.id.toString(),
                     name = entity.name,
-                    publishDate = DateTime(entity.publishDate).toString("yyyy/MM/dd"),
-                    comments = entity.comments.map { CommentModel(it) },
-                    author = entity.user?.let { UserModel(it) }
+                    publishDate = DateTime(entity.publishDate).toString("yyyy/MM/dd")
+//                    ,
+//                    comments = comments.map { CommentModel(it, it.userId) },
+//                    author = user?.let { UserModel(it) }
             )
 }
 
@@ -86,10 +91,10 @@ data class CommentModel(
         var content: String?,
         var author: UserModel?
 ) {
-    constructor(entity: CommentEntity) : this(
+    constructor(entity: CommentRecord, user: AuthorRecord?) : this(
             id = entity.id.toString(),
             content = entity.content,
-            author = entity.user?.let { UserModel(it) }
+            author = user?.let { UserModel(it) }
     )
 }
 
@@ -99,7 +104,7 @@ data class UserModel(
         var name: String?,
         var avatar: String?
 ) {
-    constructor(entity: UserEntity) : this(
+    constructor(entity: AuthorRecord) : this(
             id = entity.id.toString(),
             name = entity.name,
             avatar = entity.avatar

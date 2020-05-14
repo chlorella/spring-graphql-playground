@@ -1,0 +1,34 @@
+apply plugin: 'java'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.jooq:jooq'
+    jooqRuntime 'org.postgresql:postgresql'
+}
+
+jooq {
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.postgresql.Driver'
+            url = 'jdbc:postgresql://localhost:5432/postgres'
+            user = 'postgres'
+            password = '123456'
+        }
+        generator {
+            name = 'org.jooq.codegen.DefaultGenerator'
+            database {
+                name = 'org.jooq.meta.postgres.PostgresDatabase'
+                inputSchema = 'public'
+                includes = '.*'
+                excludes = ''
+            }
+            target {
+                packageName = ''
+                directory = 'src/main/java/generate'
+            }
+        }
+    }
+}
