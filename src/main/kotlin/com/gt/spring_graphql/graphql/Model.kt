@@ -2,19 +2,13 @@ package com.gt.spring_graphql.graphql
 
 import com.expediagroup.graphql.annotations.GraphQLDescription
 import com.expediagroup.graphql.annotations.GraphQLID
-import com.gt.spring_graphql.BookEntity
-import com.gt.spring_graphql.CommentEntity
-import com.gt.spring_graphql.UserEntity
+import com.expediagroup.graphql.annotations.GraphQLIgnore
+import graphql.schema.DataFetchingEnvironment
+import kotlinx.coroutines.future.await
 import org.joda.time.DateTime
 import org.jooq.generated.tables.records.AuthorRecord
 import org.jooq.generated.tables.records.BookRecord
 import org.jooq.generated.tables.records.CommentRecord
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
-import org.springframework.data.jpa.domain.Specification
-import javax.persistence.criteria.Predicate
 
 
 data class BookListPayload(
@@ -22,7 +16,7 @@ data class BookListPayload(
         var filterAuthorName: String?,
         var filterKeyword: String?,
         var sortBy: SortBy?,
-        var sortOrder: Sort.Direction?,
+//        var sortOrder: Sort.Direction?,
         var page: Int?,
         @GraphQLDescription("Page size must be greater than 1")
         var pageSize: Int?
@@ -69,32 +63,48 @@ data class BookModel(
         @GraphQLID
         var id: String,
         var name: String?,
-        var publishDate: String
-//        ,
-//        var comments: List<CommentModel> = emptyList(),
-//        var author: UserModel?
+        var publishDate: String,
+//        @GraphQLIgnore
+//        var commentIds: List<String> = emptyList(),
+        @GraphQLIgnore
+        var authorId: String? = ""
 ) {
-    constructor(entity: BookRecord, comments: List<CommentRecord>, user: AuthorRecord) :
-            this(
-                    id = entity.id.toString(),
-                    name = entity.name,
-                    publishDate = DateTime(entity.publishDate).toString("yyyy/MM/dd")
-//                    ,
-//                    comments = comments.map { CommentModel(it, it.userId) },
-//                    author = user?.let { UserModel(it) }
-            )
+    suspend fun author(env: DataFetchingEnvironment): UserModel? {
+        return env.getDataLoader<String?, AuthorRecord?>("authorLoader")
+                ?.load(authorId)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
+    }
+
+    suspend fun comments(environment: DataFetchingEnvironment): List<CommentModel> {
+        return emptyList()
+    }
+
+    constructor(entity: BookRecord
+//                , commentIds: List<String>
+    ) : this(
+            id = entity.id.toString(),
+            name = entity.name,
+            publishDate = DateTime(entity.publishDate.toEpochDay()).toString("yyyy/MM/dd"),
+            authorId = entity.userId?.toString()
+//            ,
+//            commentIds = commentIds
+    )
 }
 
 data class CommentModel(
         @GraphQLID
         var id: String,
         var content: String?,
-        var author: UserModel?
+        var authorId: String? = ""
 ) {
+    suspend fun author(env: DataFetchingEnvironment): UserModel? {
+        return env.getDataLoader<String?, AuthorRecord?>("authorLoader")
+                ?.load(authorId)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
+    }
+
     constructor(entity: CommentRecord, user: AuthorRecord?) : this(
             id = entity.id.toString(),
             content = entity.content,
-            author = user?.let { UserModel(it) }
+            authorId = entity.userId?.toString()
     )
 }
 
