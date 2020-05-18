@@ -94,6 +94,7 @@ data class CommentModel(
         @GraphQLID
         var id: String,
         var content: String?,
+        @GraphQLIgnore
         var authorId: String? = ""
 ) {
     suspend fun author(env: DataFetchingEnvironment): UserModel? {

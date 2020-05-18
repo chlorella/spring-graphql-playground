@@ -9,6 +9,7 @@ import org.jooq.generated.tables.records.AuthorRecord
 import org.jooq.impl.DSL
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.*
@@ -22,21 +23,11 @@ interface BookQuery : Query {
 
 @Component
 class BookQueryImpl : BookQuery {
-
-    @Value("\${datasource.url}")
-    var url: String = "jdbc:postgresql://localhost:5432/postgres"
-
-    @Value("\${datasource.username}")
-    var username: String = "postgres"
-
-    @Value("\${datasource.password}")
-    var password: String = "123456"
+    @Autowired
+    lateinit var dbService: DbService
 
     override suspend fun getBookById(@GraphQLID id: String): BookModel? {
-        return DSL.using(url, username, password).use { ctx ->
-            ctx.selectFrom(Tables.BOOK)
-                    .where(Tables.BOOK.ID.eq(UUID.fromString(id))).fetchOne()
-        }.let { BookModel(it) }
+        return BookModel(dbService.getBooksById(id))
     }
 
 //    override fun list(payload: BookListPayload): BookListModel? = bookRepository.findAll(
