@@ -27,7 +27,7 @@ class BookQueryImpl : BookQuery {
     lateinit var dbService: DbService
 
     override suspend fun getBookById(@GraphQLID id: String): BookModel? {
-        return BookModel(dbService.getBooksById(id))
+        return BookModel(dbService.getBooksById(id), dbService.getCommentsByBookId(id))
     }
 
 //    override fun list(payload: BookListPayload): BookListModel? = bookRepository.findAll(

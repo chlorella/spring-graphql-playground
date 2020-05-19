@@ -6,7 +6,6 @@ package org.jooq.generated;
 
 import org.jooq.generated.tables.Author;
 import org.jooq.generated.tables.Book;
-import org.jooq.generated.tables.BookComment;
 import org.jooq.generated.tables.Comment;
 
 
@@ -25,11 +24,6 @@ public class Tables {
      * The table <code>public.book</code>.
      */
     public static final Book BOOK = Book.BOOK;
-
-    /**
-     * The table <code>public.book_comment</code>.
-     */
-    public static final BookComment BOOK_COMMENT = BookComment.BOOK_COMMENT;
 
     /**
      * The table <code>public.comment</code>.

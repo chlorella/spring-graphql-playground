@@ -11,7 +11,6 @@ import org.jooq.Catalog;
 import org.jooq.Table;
 import org.jooq.generated.tables.Author;
 import org.jooq.generated.tables.Book;
-import org.jooq.generated.tables.BookComment;
 import org.jooq.generated.tables.Comment;
 import org.jooq.impl.SchemaImpl;
 
@@ -22,7 +21,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 239304547;
+    private static final long serialVersionUID = 534552208;
 
     /**
      * The reference instance of <code>public</code>
@@ -38,11 +37,6 @@ public class Public extends SchemaImpl {
      * The table <code>public.book</code>.
      */
     public final Book BOOK = Book.BOOK;
-
-    /**
-     * The table <code>public.book_comment</code>.
-     */
-    public final BookComment BOOK_COMMENT = BookComment.BOOK_COMMENT;
 
     /**
      * The table <code>public.comment</code>.
@@ -67,7 +61,6 @@ public class Public extends SchemaImpl {
         return Arrays.<Table<?>>asList(
             Author.AUTHOR,
             Book.BOOK,
-            BookComment.BOOK_COMMENT,
             Comment.COMMENT);
     }
 }

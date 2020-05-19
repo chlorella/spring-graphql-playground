@@ -13,7 +13,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
+import org.jooq.Row4;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -33,7 +33,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Comment extends TableImpl<CommentRecord> {
 
-    private static final long serialVersionUID = -1945698686;
+    private static final long serialVersionUID = 1893597115;
 
     /**
      * The reference instance of <code>public.comment</code>
@@ -62,6 +62,11 @@ public class Comment extends TableImpl<CommentRecord> {
      * The column <code>public.comment.user_id</code>.
      */
     public final TableField<CommentRecord, UUID> USER_ID = createField(DSL.name("user_id"), org.jooq.impl.SQLDataType.UUID, this, "");
+
+    /**
+     * The column <code>public.comment.book_id</code>.
+     */
+    public final TableField<CommentRecord, UUID> BOOK_ID = createField(DSL.name("book_id"), org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
      * Create a <code>public.comment</code> table reference
@@ -118,11 +123,15 @@ public class Comment extends TableImpl<CommentRecord> {
 
     @Override
     public List<ForeignKey<CommentRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<CommentRecord, ?>>asList(Keys.COMMENT__COMMENT_USER_ID_FK);
+        return Arrays.<ForeignKey<CommentRecord, ?>>asList(Keys.COMMENT__COMMENT_USER_ID_FK, Keys.COMMENT__COMMENT_BOOK_ID_FK);
     }
 
     public Author author() {
         return new Author(this, Keys.COMMENT__COMMENT_USER_ID_FK);
+    }
+
+    public Book book() {
+        return new Book(this, Keys.COMMENT__COMMENT_BOOK_ID_FK);
     }
 
     @Override
@@ -152,11 +161,11 @@ public class Comment extends TableImpl<CommentRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row3 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<UUID, String, UUID> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<UUID, String, UUID, UUID> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }

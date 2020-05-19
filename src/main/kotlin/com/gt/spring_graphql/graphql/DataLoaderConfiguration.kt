@@ -38,18 +38,15 @@ class DataLoaderConfiguration {
                 }
             }
 
-//            val commentLoader = DataLoader<String?, CommentRecord?> { ids ->
-//                CompletableFuture.supplyAsync {
-//                    dsl.use { ctx ->
-//                        ctx.selectFrom(Tables.COMMENT)
-//                                .where(Tables.COMMENT.ID.`in`(ids.map { UUID.fromString(it) })).fetch().toMutableList()
-//                    }
-//                }
-//            }
+            val commentLoader = DataLoader<UUID, CommentRecord?> { ids ->
+                CompletableFuture.supplyAsync {
+                    dbService.getCommentsByIds(ids)
+                }
+            }
 
             registry.register("bookLoader", bookLoader)
             registry.register("authorLoader", authorLoader)
-//            registry.register("commentLoader", commentLoader)
+            registry.register("commentLoader", commentLoader)
 
             return registry
         }

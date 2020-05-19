@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import org.jooq.generated.tables.records.AuthorRecord
 import org.jooq.generated.tables.records.BookRecord
 import org.jooq.generated.tables.records.CommentRecord
+import java.util.*
 
 
 data class BookListPayload(
@@ -64,8 +65,8 @@ data class BookModel(
         var id: String,
         var name: String?,
         var publishDate: String,
-//        @GraphQLIgnore
-//        var commentIds: List<String> = emptyList(),
+        @GraphQLIgnore
+        var commentIds: List<UUID> = emptyList(),
         @GraphQLIgnore
         var authorId: String? = ""
 ) {
@@ -74,19 +75,18 @@ data class BookModel(
                 ?.load(authorId)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
     }
 
-    suspend fun comments(environment: DataFetchingEnvironment): List<CommentModel> {
-        return emptyList()
+    suspend fun comments(env: DataFetchingEnvironment): List<CommentModel>? {
+        return env.getDataLoader<UUID?, CommentRecord?>("commentLoader")
+                ?.loadMany(commentIds)?.thenApply { list -> list?.filterNotNull()?.map { CommentModel(it) } }?.await() ?: emptyList()
     }
 
-    constructor(entity: BookRecord
-//                , commentIds: List<String>
+    constructor(entity: BookRecord, commentIds: List<UUID>
     ) : this(
             id = entity.id.toString(),
             name = entity.name,
             publishDate = DateTime(entity.publishDate.toEpochDay()).toString("yyyy/MM/dd"),
-            authorId = entity.userId?.toString()
-//            ,
-//            commentIds = commentIds
+            authorId = entity.userId?.toString(),
+            commentIds = commentIds
     )
 }
 
@@ -95,17 +95,20 @@ data class CommentModel(
         var id: String,
         var content: String?,
         @GraphQLIgnore
-        var authorId: String? = ""
+        var authorId: String? = "",
+        @GraphQLIgnore
+        var bookId: String? = ""
 ) {
     suspend fun author(env: DataFetchingEnvironment): UserModel? {
         return env.getDataLoader<String?, AuthorRecord?>("authorLoader")
                 ?.load(authorId)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
     }
 
-    constructor(entity: CommentRecord, user: AuthorRecord?) : this(
+    constructor(entity: CommentRecord) : this(
             id = entity.id.toString(),
             content = entity.content,
-            authorId = entity.userId?.toString()
+            authorId = entity.userId?.toString(),
+            bookId = entity.bookId?.toString()
     )
 }
 
