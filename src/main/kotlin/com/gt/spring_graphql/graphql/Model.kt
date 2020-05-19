@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import org.jooq.generated.tables.records.AuthorRecord
 import org.jooq.generated.tables.records.BookRecord
 import org.jooq.generated.tables.records.CommentRecord
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -84,7 +85,7 @@ data class BookModel(
     ) : this(
             id = entity.id.toString(),
             name = entity.name,
-            publishDate = DateTime(entity.publishDate.toEpochDay()).toString("yyyy/MM/dd"),
+            publishDate = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(entity.publishDate),
             authorId = entity.userId?.toString(),
             commentIds = commentIds
     )
