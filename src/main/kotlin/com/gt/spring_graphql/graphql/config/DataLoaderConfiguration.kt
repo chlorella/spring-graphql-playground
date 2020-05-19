@@ -1,16 +1,13 @@
-package com.gt.spring_graphql.graphql
+package com.gt.spring_graphql.graphql.config
 
 import com.expediagroup.graphql.spring.execution.DataLoaderRegistryFactory
+import com.gt.spring_graphql.graphql.DbService
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
-import org.jooq.DSLContext
-import org.jooq.generated.Tables
 import org.jooq.generated.tables.records.AuthorRecord
 import org.jooq.generated.tables.records.BookRecord
 import org.jooq.generated.tables.records.CommentRecord
-import org.jooq.impl.DSL
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.*
