@@ -16,9 +16,8 @@ interface DbService {
     fun getBooksById(id: String): BookRecord
     fun getBooksByIds(ids: List<String>): List<BookRecord>
     fun getAuthorByIds(ids: List<String>): List<AuthorRecord>
-    fun getCommentsByBookId(bookId: String): List<UUID>
-    fun getCommentsByIds(ids: List<UUID>): List<CommentRecord>
     fun getBookList(param: BookListParam, limit: Int, offset: Int): List<BookRecord>
+    fun getCommentsByBookIds(bookIds: MutableList<String>): List<List<CommentRecord>>
 }
 
 @Component
@@ -58,7 +57,7 @@ class DbServiceImpl : DbService {
         }
 
         return dsl.select().from(Tables.BOOK)
-                .join(Tables.AUTHOR)
+                .leftJoin(Tables.AUTHOR)
                 .onKey()
                 .where(filter)
                 .orderBy(orderBy).limit(limit).offset(offset).fetchInto(Tables.BOOK).toList()
@@ -80,15 +79,12 @@ class DbServiceImpl : DbService {
                 .where(Tables.AUTHOR.ID.`in`(ids.map { UUID.fromString(it) })).fetch().toList()
     }
 
-    override fun getCommentsByBookId(bookId: String): List<UUID> {
-        return dsl.select(Tables.COMMENT.ID).from(Tables.COMMENT)
-                .where(Tables.COMMENT.BOOK_ID.eq(UUID.fromString(bookId)))
-                .fetch(Tables.COMMENT.ID).toList()
+    override fun getCommentsByBookIds(bookIds: MutableList<String>): List<List<CommentRecord>> {
+        return bookIds.map {
+            bookId -> dsl.selectFrom(Tables.COMMENT)
+                    .where(Tables.COMMENT.BOOK_ID.eq(UUID.fromString(bookId)))
+                    .fetch().toList()
+        }
 
-    }
-
-    override fun getCommentsByIds(ids: List<UUID>): List<CommentRecord> {
-        return dsl.selectFrom(Tables.COMMENT)
-                .where(Tables.COMMENT.ID.`in`(ids.map { it })).fetch().toList()
     }
 }

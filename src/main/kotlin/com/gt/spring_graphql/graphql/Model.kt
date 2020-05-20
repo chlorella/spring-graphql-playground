@@ -50,28 +50,26 @@ data class BookModel(
         var name: String?,
         var publishDate: String,
         @GraphQLIgnore
-        var commentIds: List<UUID> = emptyList(),
-        @GraphQLIgnore
         var authorId: String? = ""
 ) {
     suspend fun author(env: DataFetchingEnvironment): UserModel? {
-        return env.getDataLoader<String?, AuthorRecord?>("authorLoader")
-                ?.load(authorId)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
+        return authorId?.let {
+            env.getDataLoader<String?, AuthorRecord?>("authorLoader")
+                    ?.load(it)?.thenApply { entity -> entity?.let { UserModel(it) } }?.await()
+        }
     }
 
     suspend fun comments(env: DataFetchingEnvironment): List<CommentModel>? {
-        return env.getDataLoader<UUID?, CommentRecord?>("commentLoader")
-                ?.loadMany(commentIds)?.thenApply { list -> list?.filterNotNull()?.map { CommentModel(it) } }?.await()
-                ?: emptyList()
+        return env.getDataLoader<String?, List<CommentRecord>?>("commentLoader")
+                ?.load(id)?.thenApply { list -> list?.map { CommentModel(it) } }?.await()
     }
 
-    constructor(entity: BookRecord, commentIds: List<UUID>
+    constructor(entity: BookRecord
     ) : this(
             id = entity.id.toString(),
             name = entity.name,
             publishDate = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(entity.publishDate),
-            authorId = entity.userId?.toString(),
-            commentIds = commentIds
+            authorId = entity.userId?.toString()
     )
 }
 

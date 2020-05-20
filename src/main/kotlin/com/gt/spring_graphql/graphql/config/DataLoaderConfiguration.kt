@@ -35,9 +35,9 @@ class DataLoaderConfiguration {
                 }
             }
 
-            val commentLoader = DataLoader<UUID, CommentRecord?> { ids ->
+            val commentLoader = DataLoader<String, List<CommentRecord>?> { ids ->
                 CompletableFuture.supplyAsync {
-                    dbService.getCommentsByIds(ids)
+                    dbService.getCommentsByBookIds(ids)
                 }
             }
 

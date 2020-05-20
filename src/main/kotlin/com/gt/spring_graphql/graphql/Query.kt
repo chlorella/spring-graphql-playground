@@ -17,10 +17,10 @@ class BookQueryImpl : BookQuery {
     lateinit var dbService: DbService
 
     override suspend fun getBookById(@GraphQLID id: String): BookModel? {
-        return BookModel(dbService.getBooksById(id), dbService.getCommentsByBookId(id))
+        return BookModel(dbService.getBooksById(id))
     }
 
     override fun list(payload: BookListParam, limit :Int?, offset: Int?): List<BookModel>? =
-            dbService.getBookList(payload, limit ?: 10, offset ?: 0).map { BookModel(it, dbService.getCommentsByBookId(it.id.toString())) }
+            dbService.getBookList(payload, limit ?: 10, offset ?: 0).map { BookModel(it) }
 }
 
