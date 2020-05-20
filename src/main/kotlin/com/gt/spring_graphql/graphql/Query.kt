@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 interface BookQuery : Query {
     suspend fun getBookById(id: String): BookModel?
-    fun list(payload: BookListParam): List<BookModel>?
+    fun list(payload: BookListParam, limit :Int?, offset: Int?): List<BookModel>?
 }
 
 @Component
@@ -20,7 +20,7 @@ class BookQueryImpl : BookQuery {
         return BookModel(dbService.getBooksById(id), dbService.getCommentsByBookId(id))
     }
 
-    override fun list(payload: BookListParam): List<BookModel>? =
-            dbService.getBookList(payload).map { BookModel(it, dbService.getCommentsByBookId(it.id.toString())) }
+    override fun list(payload: BookListParam, limit :Int?, offset: Int?): List<BookModel>? =
+            dbService.getBookList(payload, limit ?: 10, offset ?: 0).map { BookModel(it, dbService.getCommentsByBookId(it.id.toString())) }
 }
 

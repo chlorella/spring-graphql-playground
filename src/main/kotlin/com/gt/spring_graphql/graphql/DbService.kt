@@ -9,6 +9,7 @@ import org.jooq.generated.tables.records.BookRecord
 import org.jooq.generated.tables.records.CommentRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 interface DbService {
@@ -17,12 +18,13 @@ interface DbService {
     fun getAuthorByIds(ids: List<String>): List<AuthorRecord>
     fun getCommentsByBookId(bookId: String): List<UUID>
     fun getCommentsByIds(ids: List<UUID>): List<CommentRecord>
-    fun getBookList(param: BookListParam): List<BookRecord>
+    fun getBookList(param: BookListParam, limit: Int, offset: Int): List<BookRecord>
 }
 
 @Component
+@Transactional
 class DbServiceImpl : DbService {
-    
+
     @Autowired
     private lateinit var dsl: DSLContext
 
@@ -35,7 +37,7 @@ class DbServiceImpl : DbService {
         }
     }
 
-    override fun getBookList(param: BookListParam): List<BookRecord> {
+    override fun getBookList(param: BookListParam, limit: Int, offset: Int): List<BookRecord> {
         val order = param.sortOrder ?: SortOrder.ASC
 
         val filter = param.filter?.let {
@@ -59,12 +61,12 @@ class DbServiceImpl : DbService {
                 .join(Tables.AUTHOR)
                 .onKey()
                 .where(filter)
-                .orderBy(orderBy).fetchInto(Tables.BOOK).toList()
+                .orderBy(orderBy).limit(limit).offset(offset).fetchInto(Tables.BOOK).toList()
     }
 
     override fun getBooksById(id: String): BookRecord {
         return dsl.selectFrom(Tables.BOOK)
-                .where(Tables.BOOK.ID.eq(UUID.fromString(id))).fetchOne()
+                .where(Tables.BOOK.ID.eq(UUID.fromString(id))).fetchAny()
     }
 
     override fun getBooksByIds(ids: List<String>): List<BookRecord> {
