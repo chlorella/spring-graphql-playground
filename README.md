@@ -10,3 +10,13 @@ A poc project using Spring Boot, Jooq and `graphql-kotlin-spring-server` to crea
 
 2. Run Spring Boot
 - `$ gradle bootRun`
+
+## Implemented 
+- Get List
+- Get Object by Id
+- Search by user name, book name or keywords of either user name or book's name
+
+## TODO
+- Create, Update and delete by GraphQL api
+- Authorisation of api
+- More Entity
